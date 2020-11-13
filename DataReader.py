@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[11]:
 
 
 import pandas as pd
@@ -13,7 +13,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.decomposition import PCA
 
 
-# In[5]:
+# In[12]:
 
 
 class custom_data_reader():
@@ -115,17 +115,19 @@ class custom_data_reader():
         
         pca.fit(numpy_transformed_data)
         
-        ratio_sum = 0
+        eig_vals_total = np.sum(pca.explained_variance_)
+        
+        eig_vals_sum = 0
         
         vecs_count = 0
         
-        for explained_variance in pca.explained_variance_ratio_:
+        for explained_variance in pca.explained_variance_:
             
-            if ratio_sum > explained_variance_fraction:
+            if (eig_vals_sum/eig_vals_total) > explained_variance_fraction:
                 
                 break
                 
-            ratio_sum = ratio_sum + explained_variance_fraction
+            eig_vals_sum = eig_vals_sum + explained_variance
             
             vecs_count = vecs_count + 1
             
@@ -136,7 +138,7 @@ class custom_data_reader():
         return dim_reduced_data
 
 
-# In[6]:
+# In[13]:
 
 
 if __name__ == "__main__":
@@ -144,22 +146,22 @@ if __name__ == "__main__":
     obj = custom_data_reader()
 
 
-# In[ ]:
+# In[21]:
 
 
+obj = custom_data_reader()
 
 
-
-# In[ ]:
-
+# In[24]:
 
 
+read_data = obj.read_csv("data.csv",0.7,True,0.99999)
 
 
-# In[ ]:
+# In[25]:
 
 
-
+read_data.shape
 
 
 # In[ ]:
