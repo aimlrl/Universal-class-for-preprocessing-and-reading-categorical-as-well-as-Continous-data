@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[11]:
+# In[39]:
 
 
 import pandas as pd
@@ -12,36 +12,64 @@ from sklearn.impute import SimpleImputer
 
 from sklearn.decomposition import PCA
 
+from imblearn.over_sampling import SMOTE
 
-# In[12]:
+
+# In[40]:
 
 
 class custom_data_reader():
     
     
-    def read_csv(self,file_name,missing_values_threshold,apply_dim_reduction,explained_variance_fraction):
+    def read_csv(self,file_name,label_column_name,missing_values_threshold,apply_dim_reduction,explained_variance_fraction):
         
         datatype_dict = {}
         
         data = pd.read_csv(file_name)
         
+        label = np.array(data[label_column_name])
+        
+        data.drop([label_column_name],axis=1,inplace=True)
+        
         data.dropna(axis=1,inplace=True)
         
+        temp_array = np.array(data)
+        
+        very_high_var_columns = np.argwhere(np.var(temp_array,axis=0) > 1000)
+        
+        for col_index in very_high_var_columns:
+            
+            series_data = pd.Series(temp_array[:,col_index[0]])
+            
+            single_col_category_data = series_data.astype('category')
+            
+            single_col_binned_data = pd.qcut(single_col_category_data,q=10).cat.codes
+            
+            temp_array[:,col_index[0]] = np.array(single_col_binned_data)
+            
+        data = pd.DataFrame(data=temp_array,columns=data.columns)
+            
         for col in data.columns:
             
             datatype_dict[col] = self.determine_data_type(data,col,missing_values_threshold)
             
         filled_data = self.fillna(data,datatype_dict)
         
+        smote_obj = SMOTE(random_state=42)
+        
+        filled_data,label = smote_obj.fit_resample(filled_data,label)
+        
+        label = label.reshape(label.shape[0],1)
+        
         if apply_dim_reduction == True:
         
             dim_reduced_data = self.apply_PCA(filled_data,explained_variance_fraction)
             
-            return dim_reduced_data
+            return np.concatenate(tuple([dim_reduced_data,label]),axis=1)
         
         else:
             
-            return filled_data
+            return np.concatenate(tuple([filled_data,label]),axis=1)
             
             
         
@@ -138,30 +166,12 @@ class custom_data_reader():
         return dim_reduced_data
 
 
-# In[13]:
+# In[41]:
 
 
 if __name__ == "__main__":
     
     obj = custom_data_reader()
-
-
-# In[21]:
-
-
-obj = custom_data_reader()
-
-
-# In[24]:
-
-
-read_data = obj.read_csv("data.csv",0.7,True,0.99999)
-
-
-# In[25]:
-
-
-read_data.shape
 
 
 # In[ ]:
@@ -170,7 +180,31 @@ read_data.shape
 
 
 
-# In[86]:
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
 
 
 
