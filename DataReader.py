@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[36]:
+# In[83]:
 
 
 import pandas as pd
@@ -20,8 +20,16 @@ import seaborn as sns
 
 import scipy.stats as s
 
+import warnings
 
-# In[37]:
+
+# In[84]:
+
+
+warnings.filterwarnings("ignore")
+
+
+# In[85]:
 
 
 class custom_data_reader:
@@ -71,11 +79,23 @@ class custom_data_reader:
         
             dim_reduced_data = self.apply_PCA(filled_data,explained_variance_fraction)
             
+            fig,axes = plt.subplots(1,dim_reduced_data.shape[1],figsize=(15,3))
+            
+            for i in range(dim_reduced_data.shape[1]):
+                
+                axes[i].hist(dim_reduced_data[:,i])
+            
             dist_params_list = self.determine_distribution_type(dim_reduced_data)
             
             return [np.concatenate(tuple([dim_reduced_data,label]),axis=1),dist_params_list]
         
         else:
+            
+            fig,axes = plt.subplots(1,filled_data.shape[1],figsize=(15,3))
+            
+            for i in range(filled_data.shape[1]):
+                
+                axes[i].hist(filled_data[:,i])
             
             dist_params_list = self.determine_distribution_type(filled_data)
             
@@ -204,7 +224,7 @@ class custom_data_reader:
         return dist_params_list
 
 
-# In[38]:
+# In[86]:
 
 
 if __name__ == "__main__":
@@ -212,16 +232,16 @@ if __name__ == "__main__":
     obj = custom_data_reader()
 
 
-# In[ ]:
+# In[87]:
 
 
+obj = custom_data_reader()
 
 
-
-# In[ ]:
-
+# In[88]:
 
 
+data_results = obj.read_csv("data.csv","diagnosis",0.8,True,0.99)
 
 
 # In[ ]:
