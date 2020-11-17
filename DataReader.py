@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[39]:
+# In[36]:
 
 
 import pandas as pd
@@ -14,11 +14,17 @@ from sklearn.decomposition import PCA
 
 from imblearn.over_sampling import SMOTE
 
+import matplotlib.pyplot as plt
 
-# In[40]:
+import seaborn as sns
+
+import scipy.stats as s
 
 
-class custom_data_reader():
+# In[37]:
+
+
+class custom_data_reader:
     
     
     def read_csv(self,file_name,label_column_name,missing_values_threshold,apply_dim_reduction,explained_variance_fraction):
@@ -65,11 +71,15 @@ class custom_data_reader():
         
             dim_reduced_data = self.apply_PCA(filled_data,explained_variance_fraction)
             
-            return np.concatenate(tuple([dim_reduced_data,label]),axis=1)
+            dist_params_list = self.determine_distribution_type(dim_reduced_data)
+            
+            return [np.concatenate(tuple([dim_reduced_data,label]),axis=1),dist_params_list]
         
         else:
             
-            return np.concatenate(tuple([filled_data,label]),axis=1)
+            dist_params_list = self.determine_distribution_type(filled_data)
+            
+            return [np.concatenate(tuple([filled_data,label]),axis=1),dist_params_list]
             
             
         
@@ -164,14 +174,48 @@ class custom_data_reader():
         dim_reduced_data = pca.fit_transform(numpy_transformed_data)
         
         return dim_reduced_data
+    
+    
+    
+    def determine_distribution_type(self,feat_vecs):
+        
+        dist_params_list = []
+        
+        for index in range(feat_vecs.shape[1]):
+        
+            sample_mean = np.mean(feat_vecs[:,index])
+        
+            sample_std = np.std(feat_vecs[:,index])
+        
+            sample_stat = np.sqrt(np.mean(feat_vecs[:,index]**2))
+        
+            neg_log_func_gaussian = -np.sum(np.log(s.norm.pdf(sample_mean,sample_std,feat_vecs[:,index])))
+        
+            neg_log_func_rayleigh = -np.sum(np.log(s.norm.pdf(sample_stat,feat_vecs[:,index])))
+        
+            if neg_log_func_gaussian < neg_log_func_rayleigh:
+            
+                dist_params_list.append(("normal",(sample_mean,sample_std)))
+        
+            else:
+            
+                dist_params_list.append(("rayleigh",sample_stat))
+                
+        return dist_params_list
 
 
-# In[41]:
+# In[38]:
 
 
 if __name__ == "__main__":
     
     obj = custom_data_reader()
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
