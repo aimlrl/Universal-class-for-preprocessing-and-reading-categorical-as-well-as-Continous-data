@@ -235,13 +235,13 @@ if __name__ == "__main__":
 # In[87]:
 
 
-obj = custom_data_reader()
+
 
 
 # In[88]:
 
 
-data_results = obj.read_csv("data.csv","diagnosis",0.8,True,0.99)
+
 
 
 # In[ ]:
